@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer), typeof(Animator))]
 public class PlayerController : MonoBehaviour
@@ -13,16 +14,12 @@ public class PlayerController : MonoBehaviour
     // Movement Variables
     public float speed = 5.0f;
     public float jumpForce = 300.0f;
-    public bool isFlipped = false;
 
     // GroundCheck Stuff
     public bool isGrounded;
     public Transform groundCheck;
     public LayerMask isGroundLayer;
     public float groundCheckRadius = 0.02f;
-
-    // Attack Stuff
-    public bool attack = false;
 
     // Start is called before the first frame update
     void Start()
@@ -72,9 +69,29 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        AnimatorClipInfo[] curPlayingClips = anim.GetCurrentAnimatorClipInfo(0);
+
         float hInput = Input.GetAxisRaw("Horizontal");
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, isGroundLayer);
+
+        if (isGrounded)
+        {
+            rb.gravityScale = 1;
+        }
+
+        if (curPlayingClips.Length > 0)
+        {
+            if (curPlayingClips[0].clip.name == "Attack")
+            {
+                rb.velocity = Vector2.zero;
+            }
+            else
+            {
+                Vector2 moveDirection = new Vector2(hInput * speed, rb.velocity.y);
+                rb.velocity = moveDirection;
+            }
+        }
 
         // Jump Event
         if (isGrounded && Input.GetButtonDown("Jump"))
@@ -82,43 +99,59 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(Vector2.up * jumpForce);
         }
 
+        if (!isGrounded && Input.GetButtonDown("Jump"))
+        {
+            anim.SetTrigger("jumpAttack");
+        }
+
         // Attack Events
-        if (Input.GetButton("Fire1"))
+        if (Input.GetButtonDown("Fire1"))
         {
-            attack = true;
-            Debug.Log("attack is set to true");
-        }
-        else
-        {
-            attack = false;
-            Debug.Log("attack is set to false");
+            anim.SetTrigger("fire");
         }
 
-        // Flip Events
-        if (hInput == -1)
-        {
-            isFlipped = true;
-        }
-        else if (hInput == 1)
-        {
-            isFlipped = false;
-        }
+        // Flip Event
+        if (hInput != 0) sr.flipX = (hInput < 0);
 
-        if (isFlipped == true)
-        {
-            sr.flipX = true;
-        }
-        else
-        {
-            sr.flipX = false;
-        }
-
-        Vector2 moveDirection = new Vector2(hInput * speed, rb.velocity.y);
-        rb.velocity = moveDirection;
+        
 
         anim.SetFloat("hInput", Mathf.Abs(hInput));
         anim.SetBool("isGrounded", isGrounded);
-        anim.SetBool("attack", attack);
 
+    }
+
+    public void IncreaseGravity()
+    {
+        rb.gravityScale = 5;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        
     }
 }
