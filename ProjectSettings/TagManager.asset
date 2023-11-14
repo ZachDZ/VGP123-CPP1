@@ -6,7 +6,9 @@ TagManager:
   tags:
   - Pipe
   - Stone
-  - PowerUp
+  - PowerUp_RedMushroom
+  - PowerUp_BlueMushroom
+  - PowerUp_GreenMushroom
   layers:
   - Default
   - TransparentFX

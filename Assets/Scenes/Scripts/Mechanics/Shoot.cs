@@ -24,7 +24,7 @@ public class Shoot : MonoBehaviour
 
         if (!spawnPointLeft || !spawnPointRight || projectilePrefab)
         {
-            Debug.Log("Please set default values on" + gameObject.name);
+            Debug.Log("Please set default values on " + gameObject.name);
         }
     }
 

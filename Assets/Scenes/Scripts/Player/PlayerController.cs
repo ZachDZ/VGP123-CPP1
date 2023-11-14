@@ -21,6 +21,19 @@ public class PlayerController : MonoBehaviour
     public LayerMask isGroundLayer;
     public float groundCheckRadius = 0.02f;
 
+    // PowerUp Values //
+    // Speed Boost
+    public float speedBoost = 5.0f;
+    public float speedBoostTime = 3.0f;
+
+    // Invisibility
+    public bool invisible = false;
+    public float invisibleTime = 6.0f;
+
+    // Jump Boost
+    public float jumpBoost = 125.0f;
+    public float jumpBoostTime = 5.0f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -118,11 +131,43 @@ public class PlayerController : MonoBehaviour
         anim.SetFloat("hInput", Mathf.Abs(hInput));
         anim.SetBool("isGrounded", isGrounded);
 
+
+        // Invisible Event
+        Color tmpColour = GetComponent<SpriteRenderer>().color;
+
+        if (invisible)
+        {
+            tmpColour.a = 0f;
+            GetComponent<SpriteRenderer>().color = GetComponent<SpriteRenderer>().color = tmpColour;
+        }
+        else
+        {
+            tmpColour.a = 255f;
+            GetComponent<SpriteRenderer>().color = tmpColour;
+        }
     }
 
     public void IncreaseGravity()
     {
         rb.gravityScale = 5;
+    }
+
+    public IEnumerator StopSpeedBoost()
+    {
+        yield return new WaitForSeconds(speedBoostTime);
+        speed -= speedBoost;
+    }
+
+    public IEnumerator StopInvisible()
+    {
+        yield return new WaitForSeconds(invisibleTime);
+        invisible = false;
+    }
+
+    public IEnumerator StopJumpBoost()
+    {
+        yield return new WaitForSeconds(jumpBoostTime);
+        jumpForce -= jumpBoost;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -143,6 +188,25 @@ public class PlayerController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
 
+        if (collision.gameObject.CompareTag("PowerUp_RedMushroom"))
+        {
+            speed += speedBoost;
+            StartCoroutine(StopSpeedBoost());
+        }
+
+        if (collision.gameObject.CompareTag("PowerUp_BlueMushroom"))
+        {
+            invisible = true;
+            StartCoroutine(StopInvisible());
+        }
+
+        if (collision.gameObject.CompareTag("PowerUp_GreenMushroom"))
+        {
+            jumpForce += jumpBoost;
+            StartCoroutine(StopJumpBoost());
+        }
+
+        Destroy(collision.gameObject);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
